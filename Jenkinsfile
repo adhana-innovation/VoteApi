@@ -22,7 +22,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh 'docker stop voteapp || true && docker rm voteapp || true'
-                sh 'docker run -d --name voteapp -p 5000:5000 -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_USER=$DB_USER -e DB_PASSWORD=$DB_PASSWORD voteapp'
+                sh 'docker run -d --name voteapp -p 5001:5000 -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_USER=$DB_USER -e DB_PASSWORD=$DB_PASSWORD voteapp'
             }
         }
     }
