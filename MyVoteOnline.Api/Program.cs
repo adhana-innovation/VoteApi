@@ -15,14 +15,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 // Configure logging
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 var environment = app.Environment.EnvironmentName;
 logger.LogInformation($"Application environment: {environment}");
 
-// Enable Swagger only in non-production environments
-if (!app.Environment.IsProduction())
+// Enable Swagger only in non-production environments (including Docker)
+if (!app.Environment.IsProduction() || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
 {
     logger.LogInformation("Enabling Swagger in Development environment.");
     app.UseSwagger();
@@ -36,18 +35,19 @@ else
     logger.LogInformation("Swagger is disabled for non-Development environments.");
 }
 
-var devport = builder.Configuration["DockerPort:Port"];
+// Configure port binding for Docker
+var devport = builder.Configuration["DockerPort:Port"] ?? "5000";  // Default to 5000 if not set
 var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
 
 if (isDocker)
 {
-	app.Urls.Add($"http://*:{devport}");
-	logger.LogInformation($"Application is running inside Docker on port: {devport}");
+    app.Urls.Add($"http://*:{devport}");
+    logger.LogInformation($"Application is running inside Docker on port: {devport}");
 }
 else
 {
-	// Running locally, don't bind to the Docker-specific port
-	logger.LogInformation("Running locally, no Docker port configuration applied.");
+    // Running locally, don't bind to the Docker-specific port
+    logger.LogInformation("Running locally, no Docker port configuration applied.");
 }
 
 app.UseHttpsRedirection();
