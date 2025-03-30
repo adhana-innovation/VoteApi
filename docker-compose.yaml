@@ -1,0 +1,30 @@
+networks:
+  my_custom_network:
+   # driver: host
+# x-logging: &default-logging
+#   driver: loki
+#   options:
+#     loki-url: http://${LOKI_URL}:3100/api/prom/push
+ 
+services:
+ applicant-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DB_HOST: ${DB_HOST}
+        DB_USER: ${DB_USER}
+        DB_PASSWORD: ${DB_PASSWORD}
+    container_name: applicant-service-${ENV}
+    ports:
+      - "5001:5000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=eCerpac_Applicant
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - my_custom_network
+    # logging: *default-logging
